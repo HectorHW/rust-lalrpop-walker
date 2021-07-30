@@ -1,0 +1,47 @@
+
+use std::str::FromStr;
+
+use super::ast::{Expr, Op};
+
+grammar;
+
+pub Expr: Box<Expr> = {
+    <left:Expr> <operator:AdditionOp> <right:Factor>
+        => Box::new(Expr::BinaryOp{left, operator, right}),
+    Factor,
+}
+
+AdditionOp: Op = {
+    "+" => Op::Add,
+    "-" => Op::Sub,
+}
+
+Factor: Box<Expr> = {
+    <left: Factor> <operator:MulOp> <right: UnaryNeg>
+        => Box::new(Expr::BinaryOp{left, operator, right}),
+    UnaryNeg,
+}
+
+MulOp: Op = {
+    "*" => Op::Mul,
+    "/" => Op::Div,
+}
+
+
+
+UnaryNeg:Box<Expr> = {
+    <operator: "-"> <operand: Term> => Box::new(Expr::UnaryOp{
+                    operator: Op::Sub,
+                    operand
+                }),
+    Term,
+}
+
+Term: Box<Expr> = {
+    Num => Box::new(Expr::Number(<>)),
+    "(" <Expr> ")"
+}
+
+Num: i64 = {
+    r"[0-9]+" => i64::from_str(<>).unwrap()
+}
