@@ -1,9 +1,27 @@
 
 use std::str::FromStr;
 
-use super::ast::{Expr, Op};
+use super::ast::{Expr, Stmt, Op};
 
 grammar;
+
+pub Program: Vec<Stmt> = {
+    Stmt*
+}
+
+Stmt: Stmt = {
+    PrintStmt,
+    AssignStmt,
+}
+
+PrintStmt: Stmt = {
+    r"print" <expr:Expr?> ";" => Stmt::PrintStmt(expr)
+}
+
+AssignStmt: Stmt = {
+    <target:Variable> "=" <assignee:Expr> ";"
+        => Stmt::AssignStmt{ target, assignee }
+}
 
 pub Expr: Box<Expr> = {
     <left:Expr> <operator:AdditionOp> <right:Factor>
@@ -39,9 +57,21 @@ UnaryNeg:Box<Expr> = {
 
 Term: Box<Expr> = {
     Num => Box::new(Expr::Number(<>)),
+    Variable => Box::new(Expr::Variable(<>)),
     "(" <Expr> ")"
 }
 
 Num: i64 = {
     r"[0-9]+" => i64::from_str(<>).unwrap()
+}
+
+Variable: String = {
+    r"[_a-zA-Z][_a-zA-Z0-9]*" => <>.to_string()
+}
+
+match {
+    r"print"
+}else{
+    r"[_a-zA-Z][_a-zA-Z0-9]*",
+    _
 }

@@ -1,5 +1,7 @@
 use super::calculator1::ExprParser;
 use super::ast::{Expr, Op};
+use crate::parsing::calculator1::ProgramParser;
+use crate::parsing::ast::Stmt;
 
 #[test]
 fn test_wrong_token(){
@@ -57,6 +59,37 @@ fn test_priority(){
         operator: Op::Add,
         right: mul
     });
+    let res = parser.parse(str);
+
+    assert!(res.is_ok());
+    assert_eq!(res.unwrap(), expected);
+}
+
+#[test]
+fn test_print(){
+    let parser = ProgramParser::new();
+    let str = "print a;";
+    let expected = vec![Stmt::PrintStmt(
+        Some(Box::new(Expr::Variable("a".to_string())))
+    )];
+
+    let res = parser.parse(str);
+
+    assert!(res.is_ok());
+    assert_eq!(res.unwrap(), expected);
+}
+
+#[test]
+fn test_assign(){
+    let parser = ProgramParser::new();
+    let str = "a=2;";
+    let expected = vec![
+        Stmt::AssignStmt{
+            target: "a".to_string(),
+            assignee: Box::new(Expr::Number(2))
+        }
+    ];
+
     let res = parser.parse(str);
 
     assert!(res.is_ok());
